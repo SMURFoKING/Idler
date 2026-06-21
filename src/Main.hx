@@ -1,27 +1,52 @@
-import hxd.res.DefaultFont;
-import hxd.App;
-import h2d.Object;
+import h2d.TileGroup;
+import h2d.Scene;
 
 class Main extends hxd.App {
-    
-    
-    var bmp : h2d.Bitmap;
+
+    var background:Background; 
     override function init(){
-        var tf = new h2d.Text(DefaultFont.get(), s2d);
-        tf.text = "Hello :)";
+        hxd.Res.initEmbed();
 
-        var tile = h2d.Tile.fromColor(0xFF0000, 100, 100);
-        bmp = new h2d.Bitmap(tile, s2d);
-
-        bmp.x = s2d.width * 0.5;
-        bmp.y = s2d.height * 0.5;
+        background = new Background(s2d);
+        background.init();
     }
 
     override function update(dt:Float){
-        bmp.rotation += 0.1;
     }
 
     static function main() {
         new Main();
     }
 }
+
+class Background {  
+    public var background_controller:h2d.Object;
+    var bg_obj_dirt:h2d.Object;
+
+    public function new(scene:Scene){
+        var bg_image_dirt = hxd.Res.background.dirt;
+        
+        var bg_dirt = new h2d.TileGroup();
+        
+    }
+
+    function createDirtBackground(){
+        var bg_dirt = new TileGroup();
+
+        var size = 32;
+        for (x in 0...size){
+            for (y in 0...size){
+                bg_dirt.addChildAt()
+            }
+        }
+    }
+
+    public function init(){
+    }
+
+    function update(){
+
+    }
+}
+
+
