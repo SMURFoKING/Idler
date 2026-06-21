@@ -2,7 +2,7 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "HashLink (launch)",
+      "name": "HashLink",
       "request": "launch",
       "type": "hl",
       "cwd": "${workspaceFolder}",
@@ -10,25 +10,6 @@
         "type": "haxe",
         "args": "active configuration"
       }
-    },
-    {
-      "name": "C/C++ Runner: Debug Session",
-      "type": "cppdbg",
-      "request": "launch",
-      "args": [],
-      "stopAtEntry": false,
-      "externalConsole": true,
-      "cwd": "c:/Users/lukas/OneDrive/Desktop/Programming/Haxe/Idler",
-      "program": "c:/Users/lukas/OneDrive/Desktop/Programming/Haxe/Idler/build/Debug/outDebug",
-      "MIMode": "gdb",
-      "miDebuggerPath": "gdb",
-      "setupCommands": [
-        {
-          "description": "Enable pretty-printing for gdb",
-          "text": "-enable-pretty-printing",
-          "ignoreFailures": true
-        }
-      ]
     }
   ]
 }

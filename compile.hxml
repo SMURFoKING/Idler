@@ -1,6 +1,6 @@
--cp source
+-cp src
 -lib heaps
--lib format
+#-lib format
 -lib hldx
 -hl hello.hl
--main Main
+--main Main
