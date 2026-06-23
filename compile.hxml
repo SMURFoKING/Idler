@@ -1,6 +1,12 @@
 -cp src
+
 -lib heaps
-#-lib format
+-lib format
 -lib hldx
--hl hello.hl
+-lib hlimgui
+
 --main Main
+
+-cp .haxelib/hlimgui/0,0,1
+
+-hl build.hl

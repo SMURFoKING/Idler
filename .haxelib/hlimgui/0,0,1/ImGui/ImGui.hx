@@ -2,7 +2,7 @@ package imgui;
 
 abstract ExtDynamic<T>(Dynamic) from T to T {}
 
-@:enum abstract ImGuiWindowFlags(Int) from Int to Int {
+enum abstract ImGuiWindowFlags(Int) from Int to Int {
 	var None : Int = 0;
 	var NoTitleBar : Int = 1;
 	var NoResize : Int = 2;
@@ -29,7 +29,7 @@ abstract ExtDynamic<T>(Dynamic) from T to T {}
 	var NoInputs : Int = 786944;
 }
 
-@:enum abstract ImGuiDockNodeFlags(Int) from Int to Int {
+enum abstract ImGuiDockNodeFlags(Int) from Int to Int {
 	var None : Int = 0;
 	var KeepAliveOnly : Int = 1;
 	var NoCentralNode : Int = 2;
@@ -40,7 +40,7 @@ abstract ExtDynamic<T>(Dynamic) from T to T {}
 	var AutoHideTabBar : Int = 64;
 }
 
-@:enum abstract ImGuiTreeNodeFlags(Int) from Int to Int {
+enum abstract ImGuiTreeNodeFlags(Int) from Int to Int {
 	var None : Int = 0;
 	var Selected : Int = 1;
 	var Framed : Int = 2;
@@ -59,7 +59,7 @@ abstract ExtDynamic<T>(Dynamic) from T to T {}
 	var CollapsingHeader : Int = 26;
 }
 
-@:enum abstract ImGuiTabItemFlags(Int) from Int to Int {
+enum abstract ImGuiTabItemFlags(Int) from Int to Int {
 	var None : Int = 0;
 	var UnsavedDocument : Int = 1;
 	var SetSelected : Int = 2;
@@ -67,7 +67,7 @@ abstract ExtDynamic<T>(Dynamic) from T to T {}
 	var NoPushId : Int = 8;
 }
 
-@:enum abstract ImGuiTabBarFlags(Int) from Int to Int {
+enum abstract ImGuiTabBarFlags(Int) from Int to Int {
 	var None : Int = 0;
 	var Reorderable : Int = 1;
 	var AutoSelectNewTabs : Int = 2;
@@ -81,7 +81,7 @@ abstract ExtDynamic<T>(Dynamic) from T to T {}
 	var FittingPolicyDefault_ : Int = 64;
 }
 
-@:enum abstract ImGuiStyleVar(Int) from Int to Int {
+enum abstract ImGuiStyleVar(Int) from Int to Int {
 	var Alpha : Int = 0;
 	var WindowPadding : Int = 1;
 	var WindowRounding : Int = 2;
@@ -108,7 +108,7 @@ abstract ExtDynamic<T>(Dynamic) from T to T {}
 	var COUNT : Int = 23;
 }
 
-@:enum abstract ImGuiSelectableFlags(Int) from Int to Int {
+enum abstract ImGuiSelectableFlags(Int) from Int to Int {
 	var None : Int = 0;
 	var DontClosePopups : Int = 1;
 	var SpanAllColumns : Int = 2;
@@ -117,7 +117,7 @@ abstract ExtDynamic<T>(Dynamic) from T to T {}
 	var AllowItemOverlap : Int = 16;
 }
 
-@:enum abstract ImGuiNavInput(Int) from Int to Int {
+enum abstract ImGuiNavInput(Int) from Int to Int {
 	var Activate : Int = 0;
 	var Cancel : Int = 1;
 	var Input : Int = 2;
@@ -143,7 +143,7 @@ abstract ExtDynamic<T>(Dynamic) from T to T {}
 	var InternalStart_ : Int = 16;
 }
 
-@:enum abstract ImGuiMouseCursor(Int) from Int to Int {
+enum abstract ImGuiMouseCursor(Int) from Int to Int {
 	var None : Int = -1;
 	var Arrow : Int = 0;
 	var TextInput : Int = 1;
@@ -157,14 +157,14 @@ abstract ExtDynamic<T>(Dynamic) from T to T {}
 	var COUNT : Int = 9;
 }
 
-@:enum abstract ImGuiMouseButton(Int) from Int to Int {
+enum abstract ImGuiMouseButton(Int) from Int to Int {
 	var Left : Int = 0;
 	var Right : Int = 1;
 	var Middle : Int = 2;
 	var COUNT : Int = 5;
 }
 
-@:enum abstract ImGuiKey(Int) from Int to Int {
+enum abstract ImGuiKey(Int) from Int to Int {
 	var Tab : Int = 0;
 	var LeftArrow : Int = 1;
 	var RightArrow : Int = 2;
@@ -190,7 +190,7 @@ abstract ExtDynamic<T>(Dynamic) from T to T {}
 	var COUNT : Int = 22;
 }
 
-@:enum abstract ImGuiInputTextFlags(Int) from Int to Int {
+enum abstract ImGuiInputTextFlags(Int) from Int to Int {
 	var None : Int = 0;
 	var CharsDecimal : Int = 1;
 	var CharsHexadecimal : Int = 2;
@@ -215,7 +215,7 @@ abstract ExtDynamic<T>(Dynamic) from T to T {}
 	var NoMarkEdited : Int = 2097152;
 }
 
-@:enum abstract ImGuiHoveredFlags(Int) from Int to Int {
+enum abstract ImGuiHoveredFlags(Int) from Int to Int {
 	var None : Int = 0;
 	var ChildWindows : Int = 1;
 	var RootWindow : Int = 2;
@@ -228,7 +228,7 @@ abstract ExtDynamic<T>(Dynamic) from T to T {}
 	var RootAndChildWindows : Int = 3;
 }
 
-@:enum abstract ImGuiFocusedFlags(Int) from Int to Int {
+enum abstract ImGuiFocusedFlags(Int) from Int to Int {
 	var None : Int = 0;
 	var ChildWindows : Int = 1;
 	var RootWindow : Int = 2;
@@ -236,7 +236,7 @@ abstract ExtDynamic<T>(Dynamic) from T to T {}
 	var RootAndChildWindows : Int = 3;
 }
 
-@:enum abstract ImGuiDragDropFlags(Int) from Int to Int {
+enum abstract ImGuiDragDropFlags(Int) from Int to Int {
 	var None : Int = 0;
 	var SourceNoPreviewTooltip : Int = 1;
 	var SourceNoDisableHover : Int = 2;
@@ -250,7 +250,7 @@ abstract ExtDynamic<T>(Dynamic) from T to T {}
 	var AcceptPeekOnly : Int = 3072;
 }
 
-@:enum abstract ImGuiDir(Int) from Int to Int {
+enum abstract ImGuiDir(Int) from Int to Int {
 	var None : Int = -1;
 	var Left : Int = 0;
 	var Right : Int = 1;
@@ -259,7 +259,7 @@ abstract ExtDynamic<T>(Dynamic) from T to T {}
 	var COUNT : Int = 4;
 }
 
-@:enum abstract ImGuiDataType(Int) from Int to Int {
+enum abstract ImGuiDataType(Int) from Int to Int {
 	var S8 : Int = 0;
 	var U8 : Int = 1;
 	var S16 : Int = 2;
@@ -273,7 +273,7 @@ abstract ExtDynamic<T>(Dynamic) from T to T {}
 	var COUNT : Int = 10;
 }
 
-@:enum abstract ImGuiConfigFlags(Int) from Int to Int {
+enum abstract ImGuiConfigFlags(Int) from Int to Int {
 	var None : Int = 0;
 	var NavEnableKeyboard : Int = 1;
 	var NavEnableGamepad : Int = 2;
@@ -287,14 +287,14 @@ abstract ExtDynamic<T>(Dynamic) from T to T {}
 	var IsTouchScreen : Int = 2097152;
 }
 
-@:enum abstract ImGuiCond(Int) from Int to Int {
+enum abstract ImGuiCond(Int) from Int to Int {
 	var Always : Int = 1;
 	var Once : Int = 2;
 	var FirstUseEver : Int = 4;
 	var Appearing : Int = 8;
 }
 
-@:enum abstract ImGuiComboFlags(Int) from Int to Int {
+enum abstract ImGuiComboFlags(Int) from Int to Int {
 	var None : Int = 0;
 	var PopupAlignLeft : Int = 1;
 	var HeightSmall : Int = 2;
@@ -306,7 +306,7 @@ abstract ExtDynamic<T>(Dynamic) from T to T {}
 	var HeightMask_ : Int = 30;
 }
 
-@:enum abstract ImGuiColorEditFlags(Int) from Int to Int {
+enum abstract ImGuiColorEditFlags(Int) from Int to Int {
 	var None : Int = 0;
 	var NoAlpha : Int = 2;
 	var NoPicker : Int = 4;
@@ -337,7 +337,7 @@ abstract ExtDynamic<T>(Dynamic) from T to T {}
 	var _InputMask : Int = 402653184;
 }
 
-@:enum abstract ImGuiCol(Int) from Int to Int {
+enum abstract ImGuiCol(Int) from Int to Int {
 	var Text : Int = 0;
 	var TextDisabled : Int = 1;
 	var WindowBg : Int = 2;
@@ -389,7 +389,7 @@ abstract ExtDynamic<T>(Dynamic) from T to T {}
 	var COUNT : Int = 48;
 }
 
-@:enum abstract ImGuiBackendFlags(Int) from Int to Int {
+enum abstract ImGuiBackendFlags(Int) from Int to Int {
 	var None : Int = 0;
 	var HasGamepad : Int = 1;
 	var HasMouseCursors : Int = 2;
@@ -397,20 +397,20 @@ abstract ExtDynamic<T>(Dynamic) from T to T {}
 	var RendererHasVtxOffset : Int = 8;
 }
 
-@:enum abstract ImFontAtlasFlags(Int) from Int to Int {
+enum abstract ImFontAtlasFlags(Int) from Int to Int {
 	var None : Int = 0;
 	var NoPowerOfTwoHeight : Int = 1;
 	var NoMouseCursors : Int = 2;
 }
 
-@:enum abstract ImDrawListFlags(Int) from Int to Int {
+enum abstract ImDrawListFlags(Int) from Int to Int {
 	var None : Int = 0;
 	var AntiAliasedLines : Int = 1;
 	var AntiAliasedFill : Int = 2;
 	var AllowVtxOffset : Int = 4;
 }
 
-@:enum abstract ImDrawCornerFlags(Int) from Int to Int {
+enum abstract ImDrawCornerFlags(Int) from Int to Int {
 	var None : Int = 0;
 	var TopLeft : Int = 1;
 	var TopRight : Int = 2;

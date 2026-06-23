@@ -9,6 +9,9 @@
       "preLaunchTask": {
         "type": "haxe",
         "args": "active configuration"
+      },
+      "env": {
+        "HL_PATH": "${workspaceFolder}"
       }
     }
   ]

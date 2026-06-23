@@ -1,5 +1,8 @@
 package imgui;
 
+import h3d.Buffer;
+import hxd.BufferFormat;
+import hxd.BufferFormat.Precision;
 import h3d.mat.Texture;
 import imgui.ImGui;
 import hxd.Key;
@@ -79,15 +82,19 @@ private class ImGuiDrawableBuffers {
 			var draw_item = draw_list.cmd_list[cmd_index];
 
 			var ext_vertex_buffer:hl.Bytes = draw_item.vertex_buffer;
-			var vertex_stride = 8;
-			var nb_vertices = Std.int(draw_item.vertex_buffer_size/(vertex_stride*4));
+			var imguiFormat = hxd.BufferFormat.make([
+				{ name: "position", type: DVec2 }, // 2 floats
+				{ name: "uv",       type: DVec2 }, // 2 floats
+				{ name: "color",    type: DVec4 }  // 4 floats (Total = 8 floats)
+			]);
+			var nb_vertices = Std.int(draw_item.vertex_buffer_size/(imguiFormat.strideBytes));
 
 			// create or reuse vertex buffer
 			if (vertex_buffer_index >= this.vertex_buffers.length) {
-				this.vertex_buffers[vertex_buffer_index] = new h3d.Buffer(nb_vertices, vertex_stride, [RawFormat, Dynamic]);
+				this.vertex_buffers[vertex_buffer_index] = new h3d.Buffer(nb_vertices, imguiFormat, [Dynamic]);
 			} else if (this.vertex_buffers[vertex_buffer_index].vertices < nb_vertices) {
 				this.vertex_buffers[vertex_buffer_index].dispose();
-				this.vertex_buffers[vertex_buffer_index] = new h3d.Buffer(nb_vertices, vertex_stride, [RawFormat, Dynamic]);
+				this.vertex_buffers[vertex_buffer_index] = new h3d.Buffer(nb_vertices, imguiFormat, [Dynamic]);
 			}
 
 			// update vertex buffer data
