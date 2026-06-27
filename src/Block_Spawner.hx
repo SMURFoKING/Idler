@@ -1,7 +1,12 @@
-import hl.Format.PixelFormat;
+import format.gif.Data.Block;
+import h3d.mat.Texture;
+import haxe.io.BytesInput;
+import format.png.Reader;
+import format.png.Tools;
+import sys.FileSystem;
+import sys.io.File;
 import hxd.Pixels;
 import hxd.PixelFormat;
-import hxsl.Types.Texture;
 import hxd.res.Image;
 import h2d.Bitmap;
 import hxd.Rand;
@@ -11,7 +16,7 @@ import Gui;
 
 
 class Block_Spawner{
-    var block_images: Blocks;
+    var block_tiles: Blocks;
     var active_blocks: Array<Array<Bitmap>>;
 
     var diggable_width:UInt;
@@ -22,11 +27,12 @@ class Block_Spawner{
     public function new(scene:Scene, block_width:UInt, block_scale:UInt, diggable_width:UInt){
         active_blocks = new Array<Array<Bitmap>>();
         rand = new Rand(Std.int(2181));
-        block_images = new Blocks(loadOreImages());
+        loadOreImages();
 
         this.diggable_width = diggable_width;
         createBlocks(scene, block_width, block_scale);
-    }
+        }
+        
     function createBlocks(scene:Scene, block_width:UInt, block_scale:UInt){
         var size = block_width * block_scale;
         var scene_middle = scene.width / 2;   
@@ -40,8 +46,8 @@ class Block_Spawner{
                 if (active_blocks[x] == null)
                     active_blocks[x] = new Array<Bitmap>();
                 
-                var random_block_index = rand.random(Reflect.fields(block_images).length);
-                var block_tile = block_images.getByIndex(random_block_index);
+                var random_block_index = rand.random(Reflect.fields(block_tiles).length);
+                var block_tile = block_tiles.getByIndex(random_block_index);
                 
                 var block = new Bitmap(block_tile);
                 if(block.scale != null || block.x != 0)
@@ -62,7 +68,7 @@ class Block_Spawner{
                     if(Gui.debugObject){
                         Gui_Debug.hoveredPosition = block.getAbsPos();
                         Gui_Debug.hoveredBlock = block;
-                        Gui_Debug.hoveredTile = block_images.getNameByIndex(random_block_index);
+                        Gui_Debug.hoveredTile = block_tiles.getNameByIndex(random_block_index);
                     }
                 }
                 trace(bounds);
@@ -70,48 +76,64 @@ class Block_Spawner{
         }
     }
 
+    function loadOreImages() {
+        block_tiles = new Blocks();
+
+        block_tiles.apatite = hxd.Res.ores.apatite.toTile();
+        block_tiles.aquamarine = hxd.Res.ores.aquamarine.toTile();
+        block_tiles.bauxite = hxd.Res.ores.bauxite_ore.toTile();
+        block_tiles.boron = hxd.Res.ores.boron.toTile();
+        block_tiles.cinnabar = hxd.Res.ores.cinnabar_ore.toTile();
+        block_tiles.coal = hxd.Res.ores.coal.toTile();
+        block_tiles.copper = hxd.Res.ores.copper.toTile();
+        block_tiles.diamond = hxd.Res.ores.diamond.toTile();
+        block_tiles.emerald = hxd.Res.ores.emerald.toTile();
+        block_tiles.friscion = hxd.Res.ores.friscion.toTile();
+        block_tiles.galena = hxd.Res.ores.galena_ore.toTile();
+        block_tiles.garfax = hxd.Res.ores.garfax.toTile();
+        block_tiles.gold = hxd.Res.ores.gold.toTile();
+        block_tiles.iridium = hxd.Res.ores.iridium_ore.toTile();
+        block_tiles.iron = hxd.Res.ores.iron.toTile();
+        block_tiles.kelline = hxd.Res.ores.kelline.toTile();
+        block_tiles.lapis = hxd.Res.ores.lapis.toTile();
+        block_tiles.lead = hxd.Res.ores.lead_ore.toTile();
+        block_tiles.lithium = hxd.Res.ores.lithium.toTile();
+        block_tiles.magnesium = hxd.Res.ores.magnesium.toTile();
+        block_tiles.mithril = hxd.Res.ores.mithril.toTile();
+        block_tiles.morganine = hxd.Res.ores.morganine.toTile();
+        block_tiles.nickel = hxd.Res.ores.ore_nickel.toTile();
+        block_tiles.platinum = hxd.Res.ores.platinum.toTile();
+        block_tiles.silver = hxd.Res.ores.silver.toTile();
+        block_tiles.thorium = hxd.Res.ores.thorium.toTile();
+        block_tiles.tin = hxd.Res.ores.tin.toTile();
+        block_tiles.peridot = hxd.Res.ores.peridot_ore.toTile();
+        block_tiles.peridot_stone = hxd.Res.ores.peridot_ore_stone.toTile();
+        block_tiles.pyrite = hxd.Res.ores.pyrite_ore.toTile();
+        block_tiles.quartz_certus = hxd.Res.ores.quartz_certus.toTile();
+        block_tiles.quartz_certus_charged = hxd.Res.ores.quartz_certus_charged.toTile();
+        block_tiles.racheline = hxd.Res.ores.racheline.toTile();
+        block_tiles.redstone = hxd.Res.ores.redstone.toTile();
+        block_tiles.ruby = hxd.Res.ores.ruby.toTile();
+        block_tiles.sapphire = hxd.Res.ores.sapphire.toTile();
+        block_tiles.sheldonite = hxd.Res.ores.sheldonite_ore.toTile();
+        block_tiles.sheldonite_stone = hxd.Res.ores.sheldonite_ore_stone.toTile();
+        block_tiles.sodalite = hxd.Res.ores.sodalite_ore.toTile();
+        block_tiles.sodalite_stone = hxd.Res.ores.sodalite_ore_stone.toTile();
+        block_tiles.sphalerite = hxd.Res.ores.sphalerite_ore.toTile();
+        block_tiles.tungsten = hxd.Res.ores.tungsten_ore.toTile();
+        block_tiles.tungsten_stone = hxd.Res.ores.tungsten_ore_stone.toTile();
+    
+    }
+
     function update(scene:Scene){
 
-    }
-
-    function loadOreImages() : Array<Tile>{
-        var blocks:Array<Tile> = new Array<Tile>();
-
-        var size = 32;
-        var image_names = Reflect.fields(block_images);
-        for (i in 0...image_names.length){
-            var byte_image = loadOreImage(image_names[i]);
-            var customPixels = Pixels.alloc(size, size, PixelFormat.RGBA16U);
-
-            var total_bytes_to_copy = byte_image.length;
-            customPixels.bytes.blit(0, byte_image, 0, total_bytes_to_copy);
-
-            var texture = new h3d.mat.Texture(size, size, [Target], PixelFormat.RGBA16U);
-            texture.uploadPixels(customPixels);
-
-            var tile = Tile.fromTexture(texture);
-
-            customPixels.dispose();
-
-            blocks[i] = tile;
-        }
-        return blocks;
-    }
-
-    function loadOreImage(image_name:String) : haxe.io.Bytes {
-        return hxd.Res.load("ores/" + image_name + ".png").entry.getBytes();
     }
 }
 
 @:structInit
 class Blocks {
-    public function new(blocks:Array<Tile>){
-        if (blocks != null){
-            for(i in 0...blocks.length){
-                this.setByIndex(i, blocks[i]);
-            }
-        }
-        else throw "out of bounds"; 
+    public function new(){
+
     }
 
     @:arrayAccess
