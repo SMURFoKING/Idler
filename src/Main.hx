@@ -1,30 +1,21 @@
-import hxd.fmt.blend.Data.Block;
 import hxd.Window;
 import h2d.Scene;
-import imgui.ImGui;
-import imgui.ImGuiDrawable;
-
-import h2d.TileGroup;
-import hxd.res.Image;
-import h3d.Vector4;
 
 
 class Main extends hxd.App {
     var isInitReady = false;
 
     var gui:Gui;
-    var background:Background; 
-    var block_spawner:Block_Spawner;
 
     override function init(){
         var window = Window.getInstance();
         window.title = "idler";
         window.resize(1920, 1080);
+        window.displayMode = Fullscreen;
 
         hxd.Res.initLocal();
 
-        background = new Background(s2d);
-        block_spawner = new Block_Spawner();
+        World_Controller.init(s2d); // if this is after gui initiliation, the gui doesnt load?
 
         gui = new Gui(s2d);
 
@@ -37,8 +28,8 @@ class Main extends hxd.App {
     
     override function onResize() {
         if (!isInitReady) return;
-
-        ImGui.setDisplaySize(this.s2d.width, this.s2d.height);
+        World_Controller.onResize();
+        gui.onResize(s2d);
     }
 
     static function main() {
@@ -46,78 +37,22 @@ class Main extends hxd.App {
     }
 }
 
-class Gui{
-    var drawable:ImGuiDrawable;
+final class World_Controller{
+    static var background:Background; 
+    static var block_spawner:Block_Spawner;
 
-    public function new(scene:Scene){
-        this.drawable = new ImGuiDrawable(scene);
+    static var diggable_width:UInt = 5;
+    static var dirt_width: UInt = 16;
+    static var block_width: UInt = 32;
+    static var dirt_scale:UInt = 6;
+    static var block_scale:UInt = 3;
 
-        ImGui.setDisplaySize(scene.width, scene.height);
+    static public function init(scene:Scene, size:UInt = 32){
+        background = new Background(scene, dirt_width, dirt_scale, diggable_width);
+        block_spawner = new Block_Spawner(scene, block_width, block_scale, diggable_width);
     }
 
-    public function update(scene:Scene, dt:Float){
-        drawable.update(dt);
-
-        ImGui.newFrame();
-
-        ImGui.showDemoWindow();
-
-        ImGui.render();
-    }
-}
-
-class Background {  
-    public var background_controller:h2d.Object;
-    
-    var bg_side_tilegroup = new TileGroup();
-    var bg_middle_tilegroup = new TileGroup();
-
-    var bg_image_dirt:Image;
-    var bg_image_grass:Image;
-
-    public function new(scene:Scene){
-        bg_image_dirt = hxd.Res.background.dirt;
-        bg_image_grass = hxd.Res.background.grass_block_side;
-
-        bg_side_tilegroup= new h2d.TileGroup(scene);
-        bg_middle_tilegroup= new h2d.TileGroup(scene);
-        createDirtBackground(scene);
-    }
-
-    function createDirtBackground(scene:Scene){
-        bg_side_tilegroup.setScale(2.2);
-        bg_middle_tilegroup.setScale(2.2);
-        bg_middle_tilegroup.color = new Vector4(0.6, 0.6, 0.65, 1);
-
-        var size = 32;
-        var dirt_tile = bg_image_dirt.toTile();
-        var grass_tile = bg_image_grass.toTile();
-        
-        for (x in -2...size*2){
-            for (y in 0...size){
-                if(x < size-6 || size+6 < x){
-                    if(y == 0)
-                        bg_side_tilegroup.add(x * grass_tile.width, y*grass_tile.height, grass_tile);
-                    else 
-                        bg_side_tilegroup.add(x * dirt_tile.width, y * dirt_tile.height, dirt_tile);
-                   }
-                else{
-                    if(y == 0)
-                        bg_middle_tilegroup.add(x * grass_tile.width, y*grass_tile.height, grass_tile);
-                    else
-                        bg_middle_tilegroup.add(x * dirt_tile.width, y*grass_tile.height, dirt_tile);
-                }
-            }
-        }
-    }
-
-
-    public function init(){
-    }
-
-    function update(){
+    static public function onResize(){
 
     }
 }
-
-
