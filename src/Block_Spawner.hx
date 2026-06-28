@@ -1,3 +1,4 @@
+import haxe.io.Int32Array;
 import h2d.Interactive;
 import haxe.io.Float32Array;
 import h2d.Bitmap;
@@ -22,10 +23,14 @@ class Block_Spawner {
 	var adjusted_start_x:Float;
 	var adjusted_start_y:Float;
 
+	var previous_block_height:UInt;
+
 	var rand:Rand;
 
 	public function new(scene:Scene, block_width:UInt, block_scale:UInt, diggable_width:UInt) {
 		active_blocks = new Array<Array<Bitmap>>();
+		active_blocks_in_row = new Array<UInt>();
+
 		rand = new Rand(Std.int(Date.now().getSeconds()));
 		loadOreImages();
 
@@ -44,25 +49,24 @@ class Block_Spawner {
 	}
 
 	function createBlocks(scene:Scene) {
-
 		active_blocks = [
 			for (y in 0...diggable_width * 2) [
-				for (x in 0...diggable_width * 2) addBlock(scene, x, y)
+				for (x in 0...diggable_width * 2)
+					addBlock(scene, x, y)
 			]
 		];
 	}
 
-	
-	public function addNewBlockRow(scene:Scene){
-		for(x in 0...diggable_width * 2){
-			active_blocks.push(new Array<Bitmap>());
+	public function addNewBlockRow(scene:Scene) {
+		active_blocks.push(new Array<Bitmap>());
 
-
-		}
-
+		active_blocks[active_blocks.length] = [
+			for (x in 0...diggable_width * 2)
+				addBlock(scene, x, active_blocks.length)
+		];
 	}
 
-	function addBlock(scene:Scene, x:Int, y:Int) : Bitmap{
+	function addBlock(scene:Scene, x:Int, y:Int):Bitmap {
 		var random_block_index = rand.random((Reflect.fields(block_tiles).length - 1)) + 1; // - 1, then + 1 to skip first loaded tile, background
 		var block_tile = block_tiles.getByIndex(random_block_index);
 
@@ -89,18 +93,26 @@ class Block_Spawner {
 			}
 		}
 		interaction.onClick = function(event) {
-			removeBlock(block, x, y, interaction, stone_background);
+			removeBlock(scene, block, x, y, interaction, stone_background);
 		}
 
+		active_blocks_in_row[y] += 1;
+		previous_block_height = y;
 		return block;
 	}
 
-	function removeBlock(block:Bitmap, x:Int, y:Int, interaction:Interactive, background:Bitmap) {
+	function removeBlock(scene:Scene, block:Bitmap, x:Int, y:Int, interaction:Interactive, background:Bitmap) {
 		interaction.remove();
 		interaction.onOver = null;
 		interaction.onClick = null;
 		block.remove();
 		active_blocks[y].remove(block);
+
+		active_blocks_in_row[y] -= 1;
+		if (active_blocks_in_row[y] == 0) {
+			active_blocks.remove(active_blocks[y]);
+			addNewBlockRow(scene);
+		}
 
 		background.remove();
 	}
@@ -154,7 +166,7 @@ class Block_Spawner {
 		block_tiles.tungsten_stone = hxd.Res.ores.tungsten_ore_stone.toTile();
 	}
 
-	function update(scene:Scene) {}
+	public function update(scene:Scene) {}
 }
 
 @:structInit
