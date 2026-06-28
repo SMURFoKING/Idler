@@ -42,6 +42,7 @@ final class World_Controller {
 	static var block_spawner:Block_Spawner;
 
 	static var diggable_width:UInt = 5;
+	
 	static var dirt_width:UInt = 16;
 	static var dirt_scale:UInt = 6;
 	

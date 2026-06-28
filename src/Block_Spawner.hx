@@ -10,6 +10,7 @@ class Block_Spawner {
 	var block_tiles:Blocks;
 	var stone_tile:Tile = null;
 	var active_blocks:Array<Array<Bitmap>>;
+	var active_blocks_in_row:Array<UInt>;
 
 	var diggable_width:UInt;
 	var start_height = 6;
@@ -44,16 +45,11 @@ class Block_Spawner {
 
 	function createBlocks(scene:Scene) {
 
-		for (x in 0...diggable_width * 2) {
-			active_blocks.push(new Array<Bitmap>());
-
-			for (y in 0...diggable_width * 2) {
-				if (active_blocks[x] == null)
-					active_blocks[x] = new Array<Bitmap>();
-
-				addBlock(scene, x, y);
-			}
-		}
+		active_blocks = [
+			for (y in 0...diggable_width * 2) [
+				for (x in 0...diggable_width * 2) addBlock(scene, x, y)
+			]
+		];
 	}
 
 	
@@ -61,21 +57,16 @@ class Block_Spawner {
 		for(x in 0...diggable_width * 2){
 			active_blocks.push(new Array<Bitmap>());
 
+
 		}
 
 	}
 
-	function addBlock(scene:Scene, x:Int, y:Int){
+	function addBlock(scene:Scene, x:Int, y:Int) : Bitmap{
 		var random_block_index = rand.random((Reflect.fields(block_tiles).length - 1)) + 1; // - 1, then + 1 to skip first loaded tile, background
 		var block_tile = block_tiles.getByIndex(random_block_index);
 
 		var block = new h2d.Bitmap(block_tile);
-		if (block.scale != null || block.x != 0)
-			block.setScale(block_scale);
-		else {
-			block.width = block_size;
-			block.height = block_size;
-		}
 
 		var stone_background = new Bitmap(stone_tile);
 		stone_background.setPosition(adjusted_start_x + x * block_size, adjusted_start_y + y * block_size);
@@ -83,8 +74,8 @@ class Block_Spawner {
 		scene.addChild(stone_background);
 
 		block.setPosition(adjusted_start_x + x * block_size, adjusted_start_y + y * block_size);
+		block.setScale(block_scale);
 		scene.addChild(block);
-		active_blocks[x][y] = block;
 
 		var interaction = new h2d.Interactive(block_width, block_width, block);
 
@@ -100,6 +91,8 @@ class Block_Spawner {
 		interaction.onClick = function(event) {
 			removeBlock(block, x, y, interaction, stone_background);
 		}
+
+		return block;
 	}
 
 	function removeBlock(block:Bitmap, x:Int, y:Int, interaction:Interactive, background:Bitmap) {
@@ -107,7 +100,7 @@ class Block_Spawner {
 		interaction.onOver = null;
 		interaction.onClick = null;
 		block.remove();
-		active_blocks[x][y];
+		active_blocks[y].remove(block);
 
 		background.remove();
 	}
