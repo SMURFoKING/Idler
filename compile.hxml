@@ -7,6 +7,4 @@
 
 --main Main
 
--cp .haxelib/hlimgui/0,0,1
-
 -hl build.hl
