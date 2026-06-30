@@ -1,10 +1,10 @@
+import Contraptions.ContraptionType;
 import h2d.Tile;
 import h2d.Bitmap;
-import hxd.res.Image;
 import hxd.Window;
-import h2d.Graphics;
 import h2d.Scene;
 import imgui.ImGui;
+import imgui.ImGui.ImVec2;
 import imgui.ImGuiDrawable;
 import h2d.col.Matrix;
 
@@ -17,8 +17,9 @@ class Gui {
 
 	public function new(scene:Scene) {
 		this.drawable = new ImGuiDrawable(scene);
+		Gui_Debug.init();
 
-		ImGui.setDisplaySize(scene.width, scene.height);
+		// ImGui.setDisplaySize(scene.width, scene.height);
 	}
 
 	public function update(scene:Scene, dt:Float) {
@@ -27,52 +28,113 @@ class Gui {
 		ImGui.newFrame();
 
 		// ImGui.showDemoWindow();
-		renderUI();
+		renderUI(scene);
+		Gui_Debug.update();
 
 		ImGui.render();
 	}
 
-	function renderUI() {
-		ImGui.begin("GUI");
-		Gui_Debug.renderDebugger();
-		Gui_Debug.renderContraptions();
+	function renderUI(scene:Scene) {
+		ImGui.begin("GUI", ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoResize);
+		if (ImGui.beginTabBar("")) {
+			Gui_Debug.renderContraptionGUIs(scene);
+			Gui_Debug.renderDebugger();
+			ImGui.endTabBar();
+		}
 		ImGui.end();
 	}
 
-	public function onResize(scene:Scene) {
-		ImGui.setDisplaySize(scene.width, scene.height);
-	}
+	public function onResize(scene:Scene) {}
 }
-
-class Contraption {}
 
 class Gui_Debug {
 	public static var hoveredPosition:Matrix;
 	public static var hoveredTile:String = null;
+	static var buy_button_graphic:ImVec2 = {x: 100.0, y: 20.0};
+	static var button_padding = 10;
 
-	public static function init(parent:h2d.Object) {}
+	static var isContraptionHeld:Bool = false;
+	static var heldContraption:Bitmap = null;
+	static var contraptionBounds:Map<String, ImVec2>;
 
-	public static function renderContraptions() {
-		if (ImGui.beginTabBar("Contraptions")) {
-			if (ImGui.beginTabItem("")) {
-				ImGui.text("hello");
-				ImGui.endTabItem();
-			}
-			ImGui.endTabBar();
+	public static function init() {
+		contraptionBounds = new Map<String, ImVec2>();
+	}
+
+	public static function update() {
+		
+	}
+
+	public static function renderContraptionGUIs(scene:Scene) {
+		if (ImGui.beginTabItem("Storage")) {
+			ImGui.text("Drag contraptions to use in world");
+			renderContraptionStorage(scene, Contraptions.zapper);
+
+			ImGui.endTabItem();
+		}
+		if (ImGui.beginTabItem("Buy Contraption")) {
+			renderContraptionShop(Contraptions.zapper);
+			renderContraptionShop(Contraptions.burner);
+			ImGui.endTabItem();
 		}
 	}
 
-	public static function renderDebugger() {
-		if (ImGui.beginTabBar("Debugger")) {
-			if (ImGui.beginTabItem("Block Inspector")) {
-				guiMousePosition();
-				guiBlockData();
-				ImGui.checkbox("Show Block Overlay", Gui.showBlockOverlay);
-				// else
-				// ImGui.textColored(ExtDynamic<ImVec4>(1,0,0,1), "Status: No Hovered Block");
-				ImGui.endTabItem();
+	public static function renderContraptionStorage(scene:Scene, contraption:ContraptionType) {
+		var tile = contraption.tile;
+
+		ImGui.imageTile(contraption.tile, new ImVec2(tile.width * 2, tile.height * 2));
+		
+		contraptionBounds.set("zapperMinBound", ImGui.getItemRectMin());
+		contraptionBounds.set("zapperMaxBound", ImGui.getItemRectMax());
+
+		if (ImGui.getIO().MouseDown_Left) {
+			if (heldContraption == null &&
+				isMouseInTile(contraptionBounds.get("zapperMinBound"), contraptionBounds.get("zapperMaxBound"))){
+				heldContraption = new Bitmap(tile, scene);
+				isContraptionHeld = true;
 			}
-			ImGui.endTabBar();
+			setHeldContraption(heldContraption);
+		}
+		else
+			isContraptionHeld = false;
+
+		if (!isContraptionHeld) {
+			heldContraption.remove();
+			heldContraption = null;
+		}
+	}
+
+	public static function setHeldContraption(contraption:Bitmap) {
+		contraption.x = Window.getInstance().mouseX - (heldContraption.tile.width / 2);
+		contraption.y = Window.getInstance().mouseY - (heldContraption.tile.height / 2);
+	}
+
+	public static function isMouseInTile(min:ImVec2, max:ImVec2):Bool {
+		var mousePos:ImVec2 = ImGui.getMousePos();
+		if (min.x < mousePos.x && mousePos.x < max.x 
+			&& min.y < mousePos.y && mousePos.y < max.y)
+			return true;
+		return false;
+	}
+
+	public static function renderContraptionShop(contraption:ContraptionType) {
+		ImGui.text("Buy " + contraption.name + " --- ");
+		alignRight(Std.int(buy_button_graphic.x));
+		ImGui.button(contraption.cost + "$", buy_button_graphic);
+	}
+
+	public static function alignRight(elementWidth:UInt) {
+		return ImGui.sameLine(ImGui.getWindowWidth() - elementWidth - button_padding);
+	}
+
+	public static function renderDebugger() {
+		if (ImGui.beginTabItem("Block Inspector")) {
+			guiMousePosition();
+			guiBlockData();
+			ImGui.checkbox("Show Block Overlay", Gui.showBlockOverlay);
+
+			// ImGui.textColored(ExtDynamic<ImVec4>(1,0,0,1), "Status: No Hovered Block");
+			ImGui.endTabItem();
 		}
 	}
 
@@ -125,9 +187,4 @@ class Gui_Debug {
 		}
 		ImGui.separator();
 	}
-}
-
-typedef ContraptionType = {
-	name:String,
-	cost:Float
 }

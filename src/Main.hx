@@ -15,6 +15,7 @@ class Main extends hxd.App {
 		hxd.Res.initLocal();
 
 		World_Controller.init(s2d); // if this is after gui initiliation, the gui doesnt load?
+		Contraptions.init();
 
 		gui = new Gui(s2d);
 
