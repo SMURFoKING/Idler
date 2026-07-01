@@ -1,3 +1,5 @@
+import hxsl.Types.Texture;
+import h2d.Graphics;
 import Contraptions.ContraptionType;
 import h2d.Tile;
 import h2d.Bitmap;
@@ -29,7 +31,6 @@ class Gui {
 
 		// ImGui.showDemoWindow();
 		renderUI(scene);
-		Gui_Debug.update();
 
 		ImGui.render();
 	}
@@ -57,12 +58,15 @@ class Gui_Debug {
 	static var heldContraption:Bitmap = null;
 	static var contraptionBounds:Map<String, ImVec2>;
 
+	static var maxUsedContraptions: UInt = 6;
+	static var contraptionValidBoxTile:Tile = null;
+	static var contraptionValidBoxes: Array<Bitmap> = null;
+	static var contraptionValidBoxPositions: Array<ImVec2> = null;
+
 	public static function init() {
 		contraptionBounds = new Map<String, ImVec2>();
-	}
-
-	public static function update() {
-		
+		contraptionValidBoxTile = drawContraptionBox();
+		contraptionValidBoxes = new Array<Bitmap>();
 	}
 
 	public static function renderContraptionGUIs(scene:Scene) {
@@ -83,19 +87,20 @@ class Gui_Debug {
 		var tile = contraption.tile;
 
 		ImGui.imageTile(contraption.tile, new ImVec2(tile.width * 2, tile.height * 2));
-		
+
 		contraptionBounds.set("zapperMinBound", ImGui.getItemRectMin());
 		contraptionBounds.set("zapperMaxBound", ImGui.getItemRectMax());
 
-		if (ImGui.getIO().MouseDown_Left) {
-			if (heldContraption == null &&
-				isMouseInTile(contraptionBounds.get("zapperMinBound"), contraptionBounds.get("zapperMaxBound"))){
+		if (ImGui.getIO().MouseDown_Left
+			&& (isContraptionHeld || isMouseInTile(contraptionBounds.get("zapperMinBound"), contraptionBounds.get("zapperMaxBound")))) {
+			if (heldContraption == null) {
 				heldContraption = new Bitmap(tile, scene);
 				isContraptionHeld = true;
+
+				showValidContraptionPositions(scene);
 			}
-			setHeldContraption(heldContraption);
-		}
-		else
+			setHeldContraptionPos(heldContraption);
+		} else
 			isContraptionHeld = false;
 
 		if (!isContraptionHeld) {
@@ -104,15 +109,31 @@ class Gui_Debug {
 		}
 	}
 
-	public static function setHeldContraption(contraption:Bitmap) {
+	public static function showValidContraptionPositions(scene:Scene) {
+		createValidContraptionPosBox(scene, new ImVec2(0,0));
+	}
+
+	public static function createValidContraptionPosBox(scene:Scene, pos:ImVec2) {
+		for (i in 0...maxUsedContraptions){
+			var box:Bitmap = new Bitmap(contraptionValidBoxTile);
+			
+
+
+			scene.addChild(box);
+			contraptionValidBoxes.push(box);
+		}
+
+
+	}
+
+	public static function setHeldContraptionPos(contraption:Bitmap) {
 		contraption.x = Window.getInstance().mouseX - (heldContraption.tile.width / 2);
 		contraption.y = Window.getInstance().mouseY - (heldContraption.tile.height / 2);
 	}
 
 	public static function isMouseInTile(min:ImVec2, max:ImVec2):Bool {
 		var mousePos:ImVec2 = ImGui.getMousePos();
-		if (min.x < mousePos.x && mousePos.x < max.x 
-			&& min.y < mousePos.y && mousePos.y < max.y)
+		if (min.x < mousePos.x && mousePos.x < max.x && min.y < mousePos.y && mousePos.y < max.y)
 			return true;
 		return false;
 	}
@@ -186,5 +207,31 @@ class Gui_Debug {
 			// ImGui.textColored(ExtDynamic<ImVec4>(0,1,0,1), "Status: Inspecting Target");
 		}
 		ImGui.separator();
+	}
+
+	static function drawContraptionBox(): Tile{
+		var g = new h2d.Graphics();
+		var size = 28;
+		var thickness = 2;
+
+		g.beginFill(0xFFFFFF, 1);
+		g.drawRect(0,0, size, size);
+		g.endFill();
+
+		g.beginFill(0x000000, 0.7);
+		g.drawRect(thickness, thickness, size - thickness*2, size - thickness*2);
+		g.endFill();
+
+		var texture = new Texture(size, size, [Target]);
+		g.drawTo(texture);
+		g.remove();
+
+		return Tile.fromTexture(texture);
+	}
+
+	static function calculateContraptionBoxPositions() Array<ImVec2> {
+		var positions = new Array<ImVec2>();
+
+		return positions;
 	}
 }
