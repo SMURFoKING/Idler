@@ -1,4 +1,4 @@
-import Gui.Gui_Debug;
+import Gui_Contraptions.calculateContraptionBoxPositions;
 import h2d.Scene;
 
 
@@ -21,7 +21,7 @@ final class World_Controller {
 		background = new Background(scene, dirt_width, dirt_scale, diggable_width, bg_start_height);
 		block_spawner = new Block_Spawner(scene, block_width, block_scale, diggable_width, block_start_height);
 
-        Gui_Debug.calculateContraptionBoxPositions(scene.width, size, diggable_width, block_start_height);
+        Gui_Contraptions.calculateContraptionBoxPositions(scene.width, size, diggable_width, block_start_height);
 	}
 
 	static public function update(scene:Scene){
