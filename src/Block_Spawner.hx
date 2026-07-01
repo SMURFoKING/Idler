@@ -1,6 +1,8 @@
-import haxe.io.Int32Array;
+import h2d.Graphics;
+import format.ico.Tools.Uint8Array;
+import haxe.exceptions.PosException;
+import imgui.ImGui.ImVec2;
 import h2d.Interactive;
-import haxe.io.Float32Array;
 import h2d.Bitmap;
 import hxd.Rand;
 import h2d.Scene;
@@ -8,9 +10,9 @@ import h2d.Tile;
 import Gui;
 
 class Block_Spawner {
-	var block_tiles:Blocks;
+	var block_tiles:BlockTiles;
 	var stone_tile:Tile = null;
-	var active_blocks:Array<Array<Bitmap>>;
+	var active_blocks:Array<Array<Block>>;
 	var active_blocks_in_row:Array<UInt>;
 
 	var diggable_width:UInt;
@@ -25,10 +27,12 @@ class Block_Spawner {
 
 	var previous_block_height:UInt;
 
+	var onRemove:Void->Void;
+
 	var rand:Rand;
 
 	public function new(scene:Scene, block_width:UInt, block_scale:UInt, diggable_width:UInt) {
-		active_blocks = new Array<Array<Bitmap>>();
+		active_blocks = new Array<Array<Block>>();
 		active_blocks_in_row = new Array<UInt>();
 
 		rand = new Rand(Std.int(Date.now().getSeconds()));
@@ -58,7 +62,7 @@ class Block_Spawner {
 	}
 
 	public function addNewBlockRow(scene:Scene) {
-		active_blocks.push(new Array<Bitmap>());
+		active_blocks.push(new Array<Block>());
 
 		active_blocks[active_blocks.length] = [
 			for (x in 0...diggable_width * 2)
@@ -66,34 +70,15 @@ class Block_Spawner {
 		];
 	}
 
-	function addBlock(scene:Scene, x:Int, y:Int):Bitmap {
+	function addBlock(scene:Scene, x:Int, y:Int):Block {
 		var random_block_index = rand.random((Reflect.fields(block_tiles).length - 1)) + 1; // - 1, then + 1 to skip first loaded tile, background
 		var block_tile = block_tiles.getByIndex(random_block_index);
 
-		var block = new h2d.Bitmap(block_tile);
+		var block:Block = new Block(block_tile, stone_tile, block_scale, block_tiles.getNameByIndex(random_block_index));
+		block.init(scene, Std.int(adjusted_start_x + x * block_size), Std.int(adjusted_start_y + y * block_size));
 
-		var stone_background = new Bitmap(stone_tile);
-		stone_background.setPosition(adjusted_start_x + x * block_size, adjusted_start_y + y * block_size);
-		stone_background.setScale(block_scale);
-		scene.addChild(stone_background);
-
-		block.setPosition(adjusted_start_x + x * block_size, adjusted_start_y + y * block_size);
-		block.setScale(block_scale);
-		scene.addChild(block);
-
-		var interaction = new h2d.Interactive(block_width, block_width, block);
-
-		block.addChild(interaction);
-		interaction.backgroundColor = 5;
-		interaction.onOver = function(event) {
-			if (Gui.debugObject) {
-				Gui_Debug.hoveredPosition = block.getAbsPos();
-				Gui_Debug.hoveredTile = block_tiles.getNameByIndex(random_block_index);
-				Gui_Debug.renderDebugOverlay(scene, block);
-			}
-		}
-		interaction.onClick = function(event) {
-			removeBlock(scene, block, x, y, interaction, stone_background);
+		block.getInteraction().onClick = function(event) {
+			removeActiveBlock(block, x, y);
 		}
 
 		active_blocks_in_row[y] += 1;
@@ -101,24 +86,8 @@ class Block_Spawner {
 		return block;
 	}
 
-	function removeBlock(scene:Scene, block:Bitmap, x:Int, y:Int, interaction:Interactive, background:Bitmap) {
-		interaction.remove();
-		interaction.onOver = null;
-		interaction.onClick = null;
-		block.remove();
-		active_blocks[y].remove(block);
-
-		active_blocks_in_row[y] -= 1;
-		if (active_blocks_in_row[y] == 0) {
-			active_blocks.remove(active_blocks[y]);
-			addNewBlockRow(scene);
-		}
-
-		background.remove();
-	}
-
 	function loadOreImages() {
-		block_tiles = new Blocks();
+		block_tiles = new BlockTiles();
 
 		block_tiles.background = hxd.Res.ores.ore_background.toTile();
 		block_tiles.apatite = hxd.Res.ores.apatite.toTile();
@@ -166,11 +135,92 @@ class Block_Spawner {
 		block_tiles.tungsten_stone = hxd.Res.ores.tungsten_ore_stone.toTile();
 	}
 
+	public function removeActiveBlock(block:Block, x:UInt, y:UInt) {
+		block.delete();
+		active_blocks[y].remove(active_blocks[y][x]);
+
+
+		active_blocks_in_row[y] -= 1;
+		if (active_blocks_in_row[y] == 0) {
+			active_blocks.remove(active_blocks[y]);
+		}
+
+	}
+
 	public function update(scene:Scene) {}
 }
 
+class Block {
+	var block:Bitmap;
+	var background:Bitmap;
+	var interaction:h2d.Interactive;
+
+	var blockTile:Tile;
+	var bgTile:Tile;
+	var scale:UInt;
+	var tileName = "None";
+
+	public function new(blockTile:Tile, bgTile:Tile, scale:UInt, tileName:String) {
+		this.blockTile = blockTile;
+		this.bgTile = bgTile;
+		this.scale = scale;
+		this.tileName = tileName;
+	}
+
+	public function init(scene:Scene, x:Int, y:Int) {
+		background = new Bitmap(bgTile, scene);
+		block = new h2d.Bitmap(blockTile, scene);
+
+		interaction = new h2d.Interactive(blockTile.width, blockTile.height, block);
+
+		background.setPosition(x, y);
+		background.setScale(scale);
+
+		block.setPosition(x, y);
+		block.setScale(scale);
+		
+		interaction.onOver = function(event) {
+			if (Gui.debugObject) {
+				Gui_Debug.hoveredPosition = block.getAbsPos();
+				Gui_Debug.hoveredTile = tileName;
+				Gui_Debug.renderDebugOverlay(scene, block);
+			}
+		}
+	}
+
+	public function delete() {
+		trace(block);
+		this.block.remove();
+		trace(block);
+
+		this.background.remove();
+		this.interaction.onOver = null;
+		this.interaction.onClick = null;
+		this.interaction.remove();
+	}
+
+	function setPos(pos:ImVec2) {
+		block.x = pos.x;
+		block.y = pos.y;
+		background.x = pos.x;
+		background.y = pos.y;
+	}
+
+	public function getBlock():Bitmap {
+		return block;
+	}
+
+	public function getBG():Bitmap {
+		return background;
+	}
+
+	public function getInteraction():Interactive {
+		return interaction;
+	}
+}
+
 @:structInit
-class Blocks {
+class BlockTiles {
 	public function new() {}
 
 	@:arrayAccess
