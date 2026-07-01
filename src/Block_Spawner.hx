@@ -1,6 +1,3 @@
-import h2d.Graphics;
-import format.ico.Tools.Uint8Array;
-import haxe.exceptions.PosException;
 import imgui.ImGui.ImVec2;
 import h2d.Interactive;
 import h2d.Bitmap;
@@ -182,7 +179,7 @@ class Block {
 			if (Gui.debugObject) {
 				Gui_Debug.hoveredPosition = block.getAbsPos();
 				Gui_Debug.hoveredTile = tileName;
-				Gui_Debug.renderDebugOverlay(scene, block);
+				// Gui_Debug.renderDebugOverlay(scene, block);
 			}
 		}
 	}
