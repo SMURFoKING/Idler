@@ -1,3 +1,5 @@
+import h2d.Interactive;
+import Definitions.Vec2;
 import hxsl.Types.Texture;
 import h2d.Graphics;
 import Contraptions.ContraptionType;
@@ -58,10 +60,10 @@ class Gui_Debug {
 	static var heldContraption:Bitmap = null;
 	static var contraptionBounds:Map<String, ImVec2>;
 
-	static var maxUsedContraptions: UInt = 6;
+	static var maxValidContraptions:UInt = 6;
 	static var contraptionValidBoxTile:Tile = null;
-	static var contraptionValidBoxes: Array<Bitmap> = null;
-	static var contraptionValidBoxPositions: Array<ImVec2> = null;
+	static var contraptionValidBoxes:Array<Bitmap> = null;
+	static var contraptionValidBoxPositions:Array<Vec2> = null;
 
 	public static function init() {
 		contraptionBounds = new Map<String, ImVec2>();
@@ -94,10 +96,10 @@ class Gui_Debug {
 		if (ImGui.getIO().MouseDown_Left
 			&& (isContraptionHeld || isMouseInTile(contraptionBounds.get("zapperMinBound"), contraptionBounds.get("zapperMaxBound")))) {
 			if (heldContraption == null) {
+				showValidContraptionPositions(scene);
+
 				heldContraption = new Bitmap(tile, scene);
 				isContraptionHeld = true;
-
-				showValidContraptionPositions(scene);
 			}
 			setHeldContraptionPos(heldContraption);
 		} else
@@ -105,25 +107,43 @@ class Gui_Debug {
 
 		if (!isContraptionHeld) {
 			heldContraption.remove();
+			deleteValidContraptionBoxes();
 			heldContraption = null;
 		}
 	}
 
 	public static function showValidContraptionPositions(scene:Scene) {
-		createValidContraptionPosBox(scene, new ImVec2(0,0));
+		createValidContraptionPosBox(scene, new ImVec2(0, 0));
 	}
 
 	public static function createValidContraptionPosBox(scene:Scene, pos:ImVec2) {
-		for (i in 0...maxUsedContraptions){
-			var box:Bitmap = new Bitmap(contraptionValidBoxTile);
-			
+		for (i in 0...maxValidContraptions) {
+			var box:Bitmap = new Bitmap(contraptionValidBoxTile, scene);
+			var interaction:Interactive = new Interactive(contraptionValidBoxTile.width, contraptionValidBoxTile.height, box);
+			box.addChild(interaction);
 
+			var pos:Vec2 = contraptionValidBoxPositions[i];
 
-			scene.addChild(box);
+			box.x = pos.x + (contraptionValidBoxTile.width / 2);
+			box.y = pos.y + (contraptionValidBoxTile.height / 2);
+			interaction.x -= contraptionValidBoxTile.width / 2;
+			interaction.y -= contraptionValidBoxTile.height / 2;
+
+			interaction.onOver = function(_){
+				box.setScale(1.1);
+			}
+			interaction.onOut = function(_){
+				box.setScale(1);
+			}
+
 			contraptionValidBoxes.push(box);
 		}
+	}
 
-
+	static function deleteValidContraptionBoxes(){
+		for(box in contraptionValidBoxes){
+			box.remove();
+		}
 	}
 
 	public static function setHeldContraptionPos(contraption:Bitmap) {
@@ -209,29 +229,45 @@ class Gui_Debug {
 		ImGui.separator();
 	}
 
-	static function drawContraptionBox(): Tile{
+	static function drawContraptionBox():Tile {
 		var g = new h2d.Graphics();
-		var size = 28;
+		var size = 30;
 		var thickness = 2;
 
 		g.beginFill(0xFFFFFF, 1);
-		g.drawRect(0,0, size, size);
-		g.endFill();
+		g.drawRect(0, 0, thickness, size);
+		g.drawRect(0, 0, size, thickness);
+		g.drawRect(size - thickness, 0, thickness, size);
+		g.drawRect(0, size - thickness, size, thickness);
 
-		g.beginFill(0x000000, 0.7);
-		g.drawRect(thickness, thickness, size - thickness*2, size - thickness*2);
+		g.beginFill(0x000000, 0.3);
+		g.drawRect(thickness, thickness, size - thickness * 2, size - thickness * 2);
 		g.endFill();
 
 		var texture = new Texture(size, size, [Target]);
 		g.drawTo(texture);
 		g.remove();
 
-		return Tile.fromTexture(texture);
+		var tile = Tile.fromTexture(texture);
+
+		tile.setCenterRatio(0.5, 0.5);
+
+		return tile;
 	}
 
-	static function calculateContraptionBoxPositions() Array<ImVec2> {
-		var positions = new Array<ImVec2>();
+	public static function calculateContraptionBoxPositions(sceneWidth:UInt, size:UInt, diggableWidth:UInt, startHeight:UInt) {
+		contraptionValidBoxPositions = new Array<Vec2>();
+		var sceneMiddle = sceneWidth / 2 / size;
+		var currentY = 0;
 
-		return positions;
+		for (_ in 0...Std.int(maxValidContraptions/2)) {
+			var pos:Vec2 = {x: (sceneMiddle - diggableWidth - 1) * size, y: (startHeight + currentY) * size};
+			contraptionValidBoxPositions.push(pos);
+
+			pos = {x: (sceneMiddle + diggableWidth) * size, y: (startHeight + currentY) * size};
+			contraptionValidBoxPositions.push(pos);
+		
+			currentY += 1;
+		}
 	}
 }
