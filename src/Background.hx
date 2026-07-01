@@ -38,7 +38,6 @@ class Background {
 		var adjusted_scene_middle = scene.width / 2 / size;
 		var adjusted_end = Std.int(scene.width / size);
 
-		var flag = 0;
 		for (x in 0...adjusted_end) {
 			for (y in bg_start_height...size) {
 				if (x < adjusted_scene_middle - diggable_width || x >= adjusted_scene_middle + diggable_width) {
@@ -51,10 +50,6 @@ class Background {
 						bg_middle_tilegroup.add(x * grass_tile.width, y * grass_tile.height, grass_tile);
 					else
 						bg_middle_tilegroup.add(x * dirt_tile.width, y * grass_tile.height, dirt_tile);
-					// if(flag < 5) {
-					//     trace(x * dirt_tile.width + ", " + y * dirt_tile.height);
-					//     flag++;
-					// }
 				}
 			}
 		}
