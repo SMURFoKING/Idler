@@ -13,15 +13,16 @@ class Background {
 	var bg_image_grass:Image;
 
 	var diggable_width:UInt;
-	var bg_start_height = 4;
+	var bg_start_height:UInt;
 
-	public function new(scene:Scene, dirt_width:UInt, dirt_scale:UInt, diggable_width:UInt) {
+	public function new(scene:Scene, dirt_width:UInt, dirt_scale:UInt, diggable_width:UInt, start_heigth:UInt) {
 		bg_image_dirt = hxd.Res.background.dirt;
 		bg_image_grass = hxd.Res.background.grass_block_side;
 
 		bg_side_tilegroup = new h2d.TileGroup(scene);
 		bg_middle_tilegroup = new h2d.TileGroup(scene);
 		this.diggable_width = diggable_width;
+		this.bg_start_height = start_heigth;
 
 		createBackground(scene, dirt_width, dirt_scale);
 	}

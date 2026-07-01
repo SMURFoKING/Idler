@@ -16,7 +16,6 @@ class Block_Spawner {
 	var active_blocks_in_row:Array<UInt>;
 
 	var diggable_width:UInt;
-	var start_height = 6;
 
 	var block_size:UInt;
 	var block_width:UInt;
@@ -31,7 +30,7 @@ class Block_Spawner {
 
 	var rand:Rand;
 
-	public function new(scene:Scene, block_width:UInt, block_scale:UInt, diggable_width:UInt) {
+	public function new(scene:Scene, block_width:UInt, block_scale:UInt, diggable_width:UInt, start_height:UInt) {
 		active_blocks = new Array<Array<Block>>();
 		active_blocks_in_row = new Array<UInt>();
 
