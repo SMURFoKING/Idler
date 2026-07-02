@@ -1,9 +1,11 @@
+import Contraption_Controller.BurnerType;
+import Contraption_Controller.ZapperType;
 import Gui.alignRight;
 import h2d.Interactive;
 import Definitions.Vec2;
 import hxsl.Types.Texture;
 import h2d.Graphics;
-import Contraptions.ContraptionType;
+import Contraption_Controller.ContraptionBaseType;
 import h2d.Tile;
 import h2d.Bitmap;
 import h2d.Scene;
@@ -32,18 +34,18 @@ class Gui_Contraptions{
 	public static function renderContraptionGUIs(scene:Scene) {
 		if (ImGui.beginTabItem("Storage")) {
 			ImGui.text("Drag contraptions to use in world");
-			renderContraptionStorage(scene, Contraptions.zapper);
+			renderContraptionStorage(scene, Contraption_Controller.zapper);
 
 			ImGui.endTabItem();
 		}
 		if (ImGui.beginTabItem("Buy Contraption")) {
-			renderContraptionShop(Contraptions.zapper);
-			renderContraptionShop(Contraptions.burner);
+			renderContraptionShop(ZapperType.getName(), ZapperType.getCost());
+			renderContraptionShop(BurnerType.getName(), BurnerType.getCost());
 			ImGui.endTabItem();
 		}
 	}
 
-	static function renderContraptionStorage(scene:Scene, contraption:ContraptionType) {
+	static function renderContraptionStorage(scene:Scene, contraption:ContraptionBaseType) {
 		var tile = contraption.tile;
 
 		ImGui.imageTile(contraption.tile, new ImVec2(tile.width * 2, tile.height * 2));
@@ -71,10 +73,10 @@ class Gui_Contraptions{
 	}
 
 
-	static function renderContraptionShop(contraption:ContraptionType) {
-		ImGui.text("Buy " + contraption.name + " --- ");
+	static function renderContraptionShop(name:String, cost:UInt) {
+		ImGui.text("Buy " + name + " --- ");
 		alignRight(Std.int(buy_button_graphic.x), button_padding);
-		ImGui.button(contraption.cost + "$", buy_button_graphic);
+		ImGui.button(cost + "$", buy_button_graphic);
 	}
 
 	static function setHeldContraptionPos(contraption:Bitmap) {
