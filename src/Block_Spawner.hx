@@ -1,3 +1,6 @@
+import World_Controller.worldState;
+import World_Controller.blockState;
+import GameState.BlockState;
 import imgui.ImGui.ImVec2;
 import h2d.Interactive;
 import h2d.Bitmap;
@@ -6,145 +9,126 @@ import h2d.Scene;
 import h2d.Tile;
 import Gui;
 
-class Block_Spawner {
-	var block_tiles:BlockTiles;
-	var stone_tile:Tile = null;
-	var active_blocks:Array<Array<Block>>;
-	var active_blocks_in_row:Array<UInt>;
 
-	var diggable_width:UInt;
+function initBlockState(block_width:UInt, block_scale:UInt, start_height:UInt, sceneMiddle:Float, diggableWidth:UInt):BlockState {
+	var state:BlockState = {
+		blockTiles: new BlockTiles(),
 
-	var block_size:UInt;
-	var block_width:UInt;
-	var block_scale:UInt;
-	var scene_middle:Float;
-	var adjusted_start_x:Float;
-	var adjusted_start_y:Float;
+		activeBlocks: new Array<Array<Block>>(),
+		activeBlockCountInRow: new Array<UInt>(),
+		stoneTile: null,
+		rand: new Rand(Std.int(Date.now().getSeconds())),
 
-	var previous_block_height:UInt;
+		width: block_width,
+		scale: block_scale,
+		startHeight: start_height,
+		sceneMiddle: sceneMiddle,
+		size: block_width * block_scale,
 
-	var onRemove:Void->Void;
-
-	var rand:Rand;
-
-	public function new(scene:Scene, block_width:UInt, block_scale:UInt, diggable_width:UInt, start_height:UInt) {
-		active_blocks = new Array<Array<Block>>();
-		active_blocks_in_row = new Array<UInt>();
-
-		rand = new Rand(Std.int(Date.now().getSeconds()));
-		loadOreImages();
-
-		this.diggable_width = diggable_width;
-		this.block_size = block_width * block_scale;
-		this.block_width = block_width;
-		this.block_scale = block_scale;
-
-		this.scene_middle = scene.width / 2;
-		this.adjusted_start_x = scene_middle - (diggable_width * block_size);
-		this.adjusted_start_y = start_height * block_size;
-
-		this.stone_tile = block_tiles.getByIndex(0);
-
-		createBlocks(scene);
-	}
-
-	function createBlocks(scene:Scene) {
-		active_blocks = [
-			for (y in 0...diggable_width * 2) [
-				for (x in 0...diggable_width * 2)
-					addBlock(scene, x, y)
-			]
-		];
-	}
-
-	public function addNewBlockRow(scene:Scene) {
-		active_blocks.push(new Array<Block>());
-
-		active_blocks[active_blocks.length] = [
-			for (x in 0...diggable_width * 2)
-				addBlock(scene, x, active_blocks.length)
-		];
-	}
-
-	function addBlock(scene:Scene, x:Int, y:Int):Block {
-		var random_block_index = rand.random((Reflect.fields(block_tiles).length - 1)) + 1; // - 1, then + 1 to skip first loaded tile, background
-		var block_tile = block_tiles.getByIndex(random_block_index);
-
-		var block:Block = new Block(block_tile, stone_tile, block_scale, block_tiles.getNameByIndex(random_block_index));
-		block.init(scene, Std.int(adjusted_start_x + x * block_size), Std.int(adjusted_start_y + y * block_size));
-
-		block.getInteraction().onClick = function(event) {
-			removeActiveBlock(block, x, y);
-		}
-
-		active_blocks_in_row[y] += 1;
-		previous_block_height = y;
-		return block;
-	}
-
-	function loadOreImages() {
-		block_tiles = new BlockTiles();
-
-		block_tiles.background = hxd.Res.ores.ore_background.toTile();
-		block_tiles.apatite = hxd.Res.ores.apatite.toTile();
-		block_tiles.aquamarine = hxd.Res.ores.aquamarine.toTile();
-		block_tiles.bauxite = hxd.Res.ores.bauxite_ore.toTile();
-		block_tiles.boron = hxd.Res.ores.boron.toTile();
-		block_tiles.cinnabar = hxd.Res.ores.cinnabar_ore.toTile();
-		block_tiles.coal = hxd.Res.ores.coal.toTile();
-		block_tiles.copper = hxd.Res.ores.copper.toTile();
-		block_tiles.diamond = hxd.Res.ores.diamond.toTile();
-		block_tiles.emerald = hxd.Res.ores.emerald.toTile();
-		block_tiles.friscion = hxd.Res.ores.friscion.toTile();
-		block_tiles.galena = hxd.Res.ores.galena_ore.toTile();
-		block_tiles.garfax = hxd.Res.ores.garfax.toTile();
-		block_tiles.gold = hxd.Res.ores.gold.toTile();
-		block_tiles.iridium = hxd.Res.ores.iridium_ore.toTile();
-		block_tiles.iron = hxd.Res.ores.iron.toTile();
-		block_tiles.kelline = hxd.Res.ores.kelline.toTile();
-		block_tiles.lapis = hxd.Res.ores.lapis.toTile();
-		block_tiles.lead = hxd.Res.ores.lead_ore.toTile();
-		block_tiles.lithium = hxd.Res.ores.lithium.toTile();
-		block_tiles.magnesium = hxd.Res.ores.magnesium.toTile();
-		block_tiles.mithril = hxd.Res.ores.mithril.toTile();
-		block_tiles.morganine = hxd.Res.ores.morganine.toTile();
-		block_tiles.nickel = hxd.Res.ores.ore_nickel.toTile();
-		block_tiles.platinum = hxd.Res.ores.platinum.toTile();
-		block_tiles.silver = hxd.Res.ores.silver.toTile();
-		block_tiles.thorium = hxd.Res.ores.thorium.toTile();
-		block_tiles.tin = hxd.Res.ores.tin.toTile();
-		block_tiles.peridot = hxd.Res.ores.peridot_ore.toTile();
-		block_tiles.peridot_stone = hxd.Res.ores.peridot_ore_stone.toTile();
-		block_tiles.pyrite = hxd.Res.ores.pyrite_ore.toTile();
-		block_tiles.quartz_certus = hxd.Res.ores.quartz_certus.toTile();
-		block_tiles.quartz_certus_charged = hxd.Res.ores.quartz_certus_charged.toTile();
-		block_tiles.racheline = hxd.Res.ores.racheline.toTile();
-		block_tiles.redstone = hxd.Res.ores.redstone.toTile();
-		block_tiles.ruby = hxd.Res.ores.ruby.toTile();
-		block_tiles.sapphire = hxd.Res.ores.sapphire.toTile();
-		block_tiles.sheldonite = hxd.Res.ores.sheldonite_ore.toTile();
-		block_tiles.sheldonite_stone = hxd.Res.ores.sheldonite_ore_stone.toTile();
-		block_tiles.sodalite = hxd.Res.ores.sodalite_ore.toTile();
-		block_tiles.sodalite_stone = hxd.Res.ores.sodalite_ore_stone.toTile();
-		block_tiles.sphalerite = hxd.Res.ores.sphalerite_ore.toTile();
-		block_tiles.tungsten = hxd.Res.ores.tungsten_ore.toTile();
-		block_tiles.tungsten_stone = hxd.Res.ores.tungsten_ore_stone.toTile();
-	}
-
-	public function removeActiveBlock(block:Block, x:UInt, y:UInt) {
-		block.delete();
-		active_blocks[y].remove(active_blocks[y][x]);
-
-
-		active_blocks_in_row[y] -= 1;
-		if (active_blocks_in_row[y] == 0) {
-			active_blocks.remove(active_blocks[y]);
-		}
-
-	}
-
-	public function update(scene:Scene) {}
+		adjustedStartX: sceneMiddle - (diggableWidth * (block_width * block_scale)),
+		adjustedStartY: start_height * (block_width * block_scale),
+		previousBlockHeight: 0
+	};
+	return state;
 }
+
+function createBlocks(scene:Scene, diggableWidth:UInt) : Array<Array<Block>> {
+	var activeBlocks = [
+		for (y in 0...diggableWidth * 2) [
+			for (x in 0...diggableWidth * 2)
+				addBlock(scene, x, y)
+		]
+	];
+	return activeBlocks;
+}
+
+function addNewBlockRow(scene:Scene) {
+	blockState.activeBlocks.push(new Array<Block>());
+
+	blockState.activeBlocks[blockState.activeBlocks.length] = [
+		for (x in 0... worldState.diggable_width * 2)
+			addBlock(scene, x, blockState.activeBlocks.length)
+	];
+}
+
+function addBlock(scene:Scene, x:Int, y:Int):Block {
+	var random_block_index = blockState.rand.random((Reflect.fields(blockState.blockTiles).length - 1)) + 1; // + 1 to skip first loaded tile, background (a stone tile)
+	var block_tile = blockState.blockTiles.getByIndex(random_block_index);
+
+	var block:Block = new Block(block_tile, blockState.stoneTile, blockState.scale, blockState.blockTiles.getNameByIndex(random_block_index));
+	block.init(scene, Std.int(blockState.adjustedStartX + x * blockState.size), Std.int(blockState.adjustedStartY + y * blockState.size));
+
+	block.getInteraction().onClick = function(event) {
+		removeActiveBlock(block, x, y);
+	}
+
+	blockState.activeBlockCountInRow[y] += 1;
+	blockState.previousBlockHeight = y;
+	return block;
+}
+
+
+function removeActiveBlock(block:Block, x:UInt, y:UInt) {
+	block.delete();
+	blockState.activeBlocks[y].remove(blockState.activeBlocks[y][x]);
+
+	blockState.activeBlockCountInRow[y] -= 1;
+	if (blockState.activeBlockCountInRow[y] == 0) {
+		blockState.activeBlocks.remove(blockState.activeBlocks[y]);
+	}
+}
+
+function loadOreImages() : BlockTiles{
+	var blockTiles = new BlockTiles();
+
+	blockTiles.background = hxd.Res.ores.ore_background.toTile();
+	blockTiles.apatite = hxd.Res.ores.apatite.toTile();
+	blockTiles.aquamarine = hxd.Res.ores.aquamarine.toTile();
+	blockTiles.bauxite = hxd.Res.ores.bauxite_ore.toTile();
+	blockTiles.boron = hxd.Res.ores.boron.toTile();
+	blockTiles.cinnabar = hxd.Res.ores.cinnabar_ore.toTile();
+	blockTiles.coal = hxd.Res.ores.coal.toTile();
+	blockTiles.copper = hxd.Res.ores.copper.toTile();
+	blockTiles.diamond = hxd.Res.ores.diamond.toTile();
+	blockTiles.emerald = hxd.Res.ores.emerald.toTile();
+	blockTiles.friscion = hxd.Res.ores.friscion.toTile();
+	blockTiles.galena = hxd.Res.ores.galena_ore.toTile();
+	blockTiles.garfax = hxd.Res.ores.garfax.toTile();
+	blockTiles.gold = hxd.Res.ores.gold.toTile();
+	blockTiles.iridium = hxd.Res.ores.iridium_ore.toTile();
+	blockTiles.iron = hxd.Res.ores.iron.toTile();
+	blockTiles.kelline = hxd.Res.ores.kelline.toTile();
+	blockTiles.lapis = hxd.Res.ores.lapis.toTile();
+	blockTiles.lead = hxd.Res.ores.lead_ore.toTile();
+	blockTiles.lithium = hxd.Res.ores.lithium.toTile();
+	blockTiles.magnesium = hxd.Res.ores.magnesium.toTile();
+	blockTiles.mithril = hxd.Res.ores.mithril.toTile();
+	blockTiles.morganine = hxd.Res.ores.morganine.toTile();
+	blockTiles.nickel = hxd.Res.ores.ore_nickel.toTile();
+	blockTiles.platinum = hxd.Res.ores.platinum.toTile();
+	blockTiles.silver = hxd.Res.ores.silver.toTile();
+	blockTiles.thorium = hxd.Res.ores.thorium.toTile();
+	blockTiles.tin = hxd.Res.ores.tin.toTile();
+	blockTiles.peridot = hxd.Res.ores.peridot_ore.toTile();
+	blockTiles.peridot_stone = hxd.Res.ores.peridot_ore_stone.toTile();
+	blockTiles.pyrite = hxd.Res.ores.pyrite_ore.toTile();
+	blockTiles.quartz_certus = hxd.Res.ores.quartz_certus.toTile();
+	blockTiles.quartz_certus_charged = hxd.Res.ores.quartz_certus_charged.toTile();
+	blockTiles.racheline = hxd.Res.ores.racheline.toTile();
+	blockTiles.redstone = hxd.Res.ores.redstone.toTile();
+	blockTiles.ruby = hxd.Res.ores.ruby.toTile();
+	blockTiles.sapphire = hxd.Res.ores.sapphire.toTile();
+	blockTiles.sheldonite = hxd.Res.ores.sheldonite_ore.toTile();
+	blockTiles.sheldonite_stone = hxd.Res.ores.sheldonite_ore_stone.toTile();
+	blockTiles.sodalite = hxd.Res.ores.sodalite_ore.toTile();
+	blockTiles.sodalite_stone = hxd.Res.ores.sodalite_ore_stone.toTile();
+	blockTiles.sphalerite = hxd.Res.ores.sphalerite_ore.toTile();
+	blockTiles.tungsten = hxd.Res.ores.tungsten_ore.toTile();
+	blockTiles.tungsten_stone = hxd.Res.ores.tungsten_ore_stone.toTile();
+	
+	return blockTiles;
+}
+
 
 class Block {
 	var block:Bitmap;
@@ -174,7 +158,7 @@ class Block {
 
 		block.setPosition(x, y);
 		block.setScale(scale);
-		
+
 		interaction.onOver = function(event) {
 			if (Gui.debugObject) {
 				Gui_Debug.hoveredPosition = block.getAbsPos();
