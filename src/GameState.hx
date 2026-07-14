@@ -1,23 +1,48 @@
+import Block_Spawner.BlockTiles;
+import hxd.Rand;
 import hxd.res.Image;
 import h2d.TileGroup;
 import h2d.Tile;
+import Block_Spawner.Block;
 
 typedef GameState = {}
-typedef WorldState = {}
+
+typedef WorldState = {
+	diggable_width:UInt
+}
 
 typedef BackgroundState = {
-    public var width:UInt;
-    public var scale:UInt;
-    public var start_height:UInt;
-    public var size:UInt;
+	width:UInt,
+	scale:UInt,
+	start_height:UInt,
+	size:UInt,
 
-	public var dirt_tile:Tile;
-	public var grass_tile:Tile;
-    public var dirt_image:Image;
-    public var grass_image:Image;
+	dirt_tile:Tile,
+	grass_tile:Tile,
+	dirt_image:Image,
+	grass_image:Image,
 
-	public var sides_tilegroup:TileGroup;
-	var middle_tilegroup:TileGroup;
+	sides_tilegroup:TileGroup,
+	middle_tilegroup:TileGroup
+}
+
+typedef BlockState = {
+    blockTiles:BlockTiles,
+	activeBlocks:Array<Array<Block>>,
+	activeBlockCountInRow:Array<UInt>,
+
+	stoneTile:Tile,
+    width:UInt,
+	scale:UInt,
+    size: UInt,
+	startHeight:UInt,
+    sceneMiddle:Float,
+    adjustedStartX:Float,
+    adjustedStartY:Float,
+
+    previousBlockHeight:UInt,
+
+    rand:Rand
 }
 
 typedef MineableBlockState = {}
