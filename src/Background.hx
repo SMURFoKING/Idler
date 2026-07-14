@@ -1,62 +1,57 @@
-import hxd.res.Image;
-import h2d.Scene;
+import World_Controller.bg_state;
+import GameState.BackgroundState;
 import h2d.TileGroup;
 import h3d.Vector4;
 
-class Background {
-	public var background_controller:h2d.Object;
 
-	var bg_side_tilegroup = new TileGroup();
-	var bg_middle_tilegroup = new TileGroup();
+function initBGState(block_width:UInt, block_scale:UInt, start_height:UInt):BackgroundState {
+	var state:BackgroundState = {
+		width: block_width,
+		scale: block_scale,
+		start_height: start_height,
+		size: block_width * block_scale,
 
-	var bg_image_dirt:Image;
-	var bg_image_grass:Image;
+		dirt_image: hxd.Res.background.dirt,
+		dirt_tile: hxd.Res.background.dirt.toTile(),
+		grass_image: hxd.Res.background.grass_block_side,
+		grass_tile: hxd.Res.background.grass_block_side.toTile(),
+		sides_tilegroup: new TileGroup(),
+		middle_tilegroup: new TileGroup()
+	};
 
-	var diggable_width:UInt;
-	var bg_start_height:UInt;
+	return state;
+}
 
-	public function new(scene:Scene, dirt_width:UInt, dirt_scale:UInt, diggable_width:UInt, start_heigth:UInt) {
-		bg_image_dirt = hxd.Res.background.dirt;
-		bg_image_grass = hxd.Res.background.grass_block_side;
+function setSidesTileGroupSettingsForBG(tileGroup:TileGroup):TileGroup {
+	tileGroup.setScale(bg_state.scale);
+	return tileGroup;
+}
 
-		bg_side_tilegroup = new h2d.TileGroup(scene);
-		bg_middle_tilegroup = new h2d.TileGroup(scene);
-		this.diggable_width = diggable_width;
-		this.bg_start_height = start_heigth;
+function setMiddleTileGroupSettingsForBG(tileGroup:TileGroup):TileGroup {
+	tileGroup.setScale(bg_state.scale);
+	tileGroup.color = new Vector4(0.6, 0.6, 0.65, 1);
+	return tileGroup;
+}
 
-		createBackground(scene, dirt_width, dirt_scale);
-	}
+// still wrong, has hidden side effects: changes state from inside the function of both bg tilegroups.
+// requires splitting function into multiple to fix. Will do additional changes to allow more flexibility so im holding off.
+function createBG(scene_width:UInt, diggable_width:UInt) {
+	var adjusted_scene_middle = scene_width / 2 / bg_state.size;
+	var adjusted_end = Std.int(scene_width / bg_state.size);
 
-	function createBackground(scene:Scene, dirt_width:UInt, dirt_scale:UInt) {
-		bg_side_tilegroup.setScale(dirt_scale);
-		bg_middle_tilegroup.setScale(dirt_scale);
-		bg_middle_tilegroup.color = new Vector4(0.6, 0.6, 0.65, 1);
-
-		var dirt_tile = bg_image_dirt.toTile();
-		var grass_tile = bg_image_grass.toTile();
-		var size = dirt_width * dirt_scale;
-
-		var adjusted_scene_middle = scene.width / 2 / size;
-		var adjusted_end = Std.int(scene.width / size);
-
-		for (x in 0...adjusted_end) {
-			for (y in bg_start_height...size) {
-				if (x < adjusted_scene_middle - diggable_width || x >= adjusted_scene_middle + diggable_width) {
-					if (y == bg_start_height)
-						bg_side_tilegroup.add(x * grass_tile.width, y * grass_tile.height, grass_tile);
-					else
-						bg_side_tilegroup.add(x * dirt_tile.width, y * dirt_tile.height, dirt_tile);
-				} else {
-					if (y == bg_start_height)
-						bg_middle_tilegroup.add(x * grass_tile.width, y * grass_tile.height, grass_tile);
-					else
-						bg_middle_tilegroup.add(x * dirt_tile.width, y * grass_tile.height, dirt_tile);
-				}
+	for (x in 0...adjusted_end) {
+		for (y in bg_state.start_height...bg_state.size) {
+			if (x < adjusted_scene_middle - diggable_width || x >= adjusted_scene_middle + diggable_width) {
+				if (y == bg_state.start_height)
+					bg_state.sides_tilegroup.add(x * bg_state.grass_tile.width, y * bg_state.grass_tile.height, bg_state.grass_tile);
+				else
+					bg_state.sides_tilegroup.add(x * bg_state.dirt_tile.width, y * bg_state.dirt_tile.height, bg_state.dirt_tile);
+			} else {
+				if (y == bg_state.start_height)
+					bg_state.middle_tilegroup.add(x * bg_state.grass_tile.width, y * bg_state.grass_tile.height, bg_state.grass_tile);
+				else
+					bg_state.middle_tilegroup.add(x * bg_state.dirt_tile.width, y * bg_state.grass_tile.height, bg_state.dirt_tile);
 			}
 		}
 	}
-
-	public function init() {}
-
-	function update() {}
 }
